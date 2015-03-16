@@ -1,0 +1,32 @@
+---
+- hosts: zabbix-agent
+  sudo : yes
+  vars:
+    zabbix_agent_hostname: "{{inventory_hostname}}"
+
+  vars_files:
+    - ./external_vars.yml
+
+  handlers:
+   - name: restart zabbix-agent
+     service: name=zabbix-agent state=restarted
+
+  tasks:
+  - name: Install zabbixAgent
+    apt: name={{ item }} update_cache=yes cache_valid_time=3600 state=present
+    sudo: yes
+    with_items:
+    - zabbix-agent
+
+  - name: zabbix agent config
+    sudo: yes
+    template: src=./zabbix_agentd.conf.j2 dest=/etc/zabbix/zabbix_agentd.conf
+
+    notify: restart zabbix-agent
+
+  - name: zabbix server create host
+    connection: local
+    command: python ./zabbix_add_host.py {{ zabbix_url }} {{ zabbix_username }} {{ zabbix_password }} {{ zabbix_host_group_id }} {{ zabbix_templeate_id }} {{ zabbix_proxy_id }} {{ zabbix_agent_hostname }} {{ ansible_eth0.ipv4.address }}
+    register: command_result
+    failed_when: "'error' in command_result.stderr"
+

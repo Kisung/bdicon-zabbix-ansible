@@ -1,0 +1,18 @@
+---
+mysql_root_password: root
+
+zabbix_server_ip: ###.###.###.###
+zabbix_host_group_id: #
+zabbix_templeate_id: #####
+
+zabbix_proxy_id : #
+zabbix_proxy_ip: ###.###.###.###
+zabbix_active: ###.###.###.###:#####
+
+zabbix_url: http://{enter URL}/zabbix
+zabbix_password: zabbix
+zabbix_username: admin
+
+
+
+

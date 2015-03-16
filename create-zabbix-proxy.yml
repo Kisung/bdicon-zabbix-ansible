@@ -1,0 +1,82 @@
+---
+- hosts: zabbix-proxy
+  sudo : yes
+  vars:
+    zabbix_proxy_hostname: "{{inventory_hostname}}"
+
+  vars_files:
+    - ./external_vars.yml
+
+  handlers:
+  - name: restart zabbix-proxy
+    service: name=zabbix-proxy state=restarted
+    
+  tasks:
+  - name: Install MySQL
+    apt: name={{ item }} update_cache=yes cache_valid_time=3600 state=present
+    sudo: yes
+    with_items:
+    - python-mysqldb
+    - mysql-server
+    - zabbix-proxy-mysql
+
+  - name: Start the MySQL service
+    sudo: yes
+    service: 
+      name: mysql 
+      state: started
+      enabled: true
+
+  - name: update mysql root password for all root accounts
+    sudo: yes
+    mysql_user: 
+      name: root 
+      host: "{{ item }}" 
+      password: "{{ mysql_root_password }}"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      check_implicit_admin: yes
+      priv: "*.*:ALL,GRANT"
+    with_items:
+      - "{{ ansible_hostname }}"
+      - 127.0.0.1
+      - ::1
+      - localhost 
+  
+  - name: Create database
+    mysql_db: db=zabbix state=present encoding=utf8 collation=utf8_bin login_user=root login_password="{{ mysql_root_password }}"
+
+  - name: Create database user localhost
+    mysql_user: user=zabbix password=zabbix host=localhost priv=*.*:ALL state=present login_user=root login_password="{{ mysql_root_password }}"
+
+  - name: Create database user '%'
+    mysql_user: user=zabbix password=zabbix host=% priv=*.*:ALL,GRANT state=present login_user=root login_password="{{ mysql_root_password }}"
+
+  - name: Zabbix Sceme File Copy
+    sudo: yes
+    copy: src=./schema.sql dest=/etc/zabbix/schema.sql
+
+  - name: Create Zabbix Scheme
+    shell: cat /etc/zabbix/schema.sql | mysql -u zabbix -pzabbix zabbix
+    ignore_errors: True
+    
+  - name: zabbix proxy init 
+    sudo: yes
+    template: src=./zabbix-proxy.j2 dest=/etc/default/zabbix-proxy
+
+  - name: zabbix proxy config 
+    sudo: yes
+    template: src=./zabbix_proxy.conf.j2 dest=/etc/zabbix/zabbix_proxy.conf
+
+  - name: Assures /usr/lib/zabbix/externalscripts dir exists
+    file: path=/usr/lib/zabbix/externalscripts/ state=directory
+    
+    notify : restart zabbix-proxy
+
+  - name: zabbix server create proxy
+    connection: local
+    command: python ./zabbix_add_proxy.py {{ zabbix_url }} {{ zabbix_username }} {{ zabbix_password }} {{ zabbix_proxy_hostname }}
+    register: command_result
+    failed_when: "'error' in command_result.stderr"
+
+
