@@ -1,0 +1,11 @@
+# This is a config file for the Zabbix agent daemon (Unix)
+# To get more information about Zabbix, visit http://www.zabbix.com
+############ GENERAL PARAMETERS #################
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix-agent/zabbix_agentd.log
+LogFileSize=0
+Server={{ zabbix_proxy_ip }}
+ServerActive={{ zabbix_active }}
+Hostname={{ zabbix_agent_hostname }}
+Include=/etc/zabbix/zabbix_agentd.conf.d/
+

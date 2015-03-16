@@ -1,0 +1,33 @@
+---
+- hosts: all
+  sudo : yes
+  vars:
+    zabbix_agent_hostname: "{{inventory_hostname}}"
+
+  vars_files:
+    - ./external_vars.yml
+
+  tasks:
+#  - name: echo test
+#    connection: local
+#    command: python ./zabbix_add_host.py {{ zabbix_url }} {{ zabbix_username }} {{ zabbix_password }} {{ zabbix_host_group_id }} {{ zabbix_templeate_id }} {{ zabbix_proxy_ip }} {{ zabbix_proxy_hostname }} {{ ansible_eth0.ipv4.address }}
+#    register: command_result
+#    when: zabbix_proxy_hostname in groups['zabbix-agent']
+#    failed_when: "'error' in command_result.stderr"
+#  
+#  - debug: msg="host id {{ command_result.stdout }}"
+
+  - name: echo external vars 
+    shell: echo "{{ item }}"
+    with_items:
+      - "{{ zabbix_agent_hostname }}"
+      - "{{ mysql_root_password }}"
+      - "{{ zabbix_server_ip }}"
+      - "{{ zabbix_host_group_id }}"
+      - "{{ zabbix_templeate_id }}"
+      - "{{ zabbix_proxy_id }}"
+      - "{{ zabbix_proxy_ip }}"
+      - "{{ zabbix_active }}"
+      - "{{ zabbix_url }}"
+      - "{{ zabbix_password }}"
+      - "{{ zabbix_username }}"

@@ -1,0 +1,33 @@
+# This is a configuration file for Zabbix Proxy process
+# To get more information about Zabbix,
+# visit http://www.zabbix.com
+
+############ GENERAL PARAMETERS #################
+Server={{ zabbix_server_ip }}
+# ServerPort=10051
+Hostname={{ zabbix_proxy_hostname }}
+# HostnameItem=system.hostname
+# ListenPort=10051
+# SourceIP=
+LogFile=/var/log/zabbix-proxy/zabbix_proxy.log
+# DebugLevel=3
+PidFile=/var/run/zabbix/zabbix_proxy.pid
+DBHost=localhost
+DBName=zabbix
+DBUser=zabbix
+DBPassword=zabbix
+DBSocket=/var/run/mysqld/mysqld.sock
+# DBPort=3306
+# ProxyLocalBuffer=0
+# ProxyOfflineBuffer=1
+# HeartbeatFrequency=60
+# ConfigFrequency=3600
+# DataSenderFrequency=1
+
+############ ADVANCED PARAMETERS ################
+JavaGateway=127.0.0.1
+JavaGatewayPort=10052
+StartJavaPollers=5
+ExternalScripts=/usr/lib/zabbix/externalscripts
+FpingLocation=/usr/bin/fping
+Fping6Location=/usr/bin/fping6
